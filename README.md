@@ -13,6 +13,7 @@ English | [中文说明](README.zh-CN.md)
 ![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## Features
 
@@ -164,3 +165,7 @@ cd frontend && npm run lint && npm run build
 ## Acknowledgements
 
 This project was developed with the assistance of [opencode](https://opencode.ai), an open-source AI coding agent. It builds on the excellent work of the open-source community, including FastAPI, SQLAlchemy, httpx, tiktoken, Next.js, React, Tailwind CSS, ECharts, and Radix UI. Thanks to the maintainers and contributors of these projects.
+
+## License
+
+Released under the [MIT License](LICENSE).

@@ -15,6 +15,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## 功能
 
@@ -173,3 +174,7 @@ cd frontend && npm run lint && npm run build
 本项目在开发过程中借助开源 AI 编程助手 [opencode](https://opencode.ai) 完成。项目同样建立在
 众多优秀开源工作之上，包括 FastAPI、SQLAlchemy、httpx、tiktoken、Next.js、React、
 Tailwind CSS、ECharts 与 Radix UI，在此向这些项目的维护者与贡献者致以感谢。
+
+## 许可证
+
+本项目基于 [MIT 许可证](LICENSE) 开源。
