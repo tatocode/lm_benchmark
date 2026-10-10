@@ -1,0 +1,33 @@
+# 三平台通用：Windows / macOS / Linux 直接 `docker compose up -d --build`。
+#
+# 「localhost 直达宿主机」原理：
+#   - 容器内默认把出站 localhost / 127.0.0.1 映射到 host.docker.internal（后端 LMB_IN_DOCKER=1）。
+#   - Windows / macOS 的 Docker Desktop 原生提供 host.docker.internal；
+#   - Linux（≥ Docker 20.10）由下面的 extra_hosts: host-gateway 解析到宿主机。
+#   - Linux 下若本机 LLM 只监听 127.0.0.1，需让它监听 0.0.0.0
+#     （如 Ollama 设 OLLAMA_HOST=0.0.0.0；vLLM/llama.cpp 用 --host 0.0.0.0），
+#     或用环境变量 LMB_MAP_LOCALHOST_HOST 指向宿 IP（如 172.17.0.1）。
+services:
+  llm-benchmark:
+    build: .
+    ports:
+      - "${LMB_UI_BIND:-0.0.0.0}:${LMB_UI_PORT:-8000}:8000"
+    volumes:
+      - llmbench-data:/data
+    environment:
+      - LMB_HOST=0.0.0.0
+      - LMB_PORT=8000
+      - LMB_IN_DOCKER=1
+      - LMB_MAP_LOCALHOST_HOST=${LMB_MAP_LOCALHOST_HOST:-host.docker.internal}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  llmbench-data:
