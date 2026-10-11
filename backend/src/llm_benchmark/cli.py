@@ -762,3 +762,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 __all__ = ["main", "build_parser", "run_benchmark", "render_result"]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

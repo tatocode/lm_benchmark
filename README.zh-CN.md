@@ -153,7 +153,7 @@ uv run llm-bench --base-url http://127.0.0.1:11434/v1 --model llama3 \
 
 注意：
 
-- 需要 `python3` 3.12+（或已安装 `uvx`/`uv`，可自动准备合适的运行时）。启动脚本会优先使用 `uvx`/`uv`，其次 `pipx`，最后回退到临时 `venv`。
+- 不会安装任何包：启动脚本把源码取到缓存目录，只用 `httpx`、`pydantic`、`tiktoken` 三个依赖直接运行 CLI 模块。若已装 `uv`，会自动准备依赖与 Python 3.12+；否则回退到本地 `venv`，此时需要 `python3` 3.12+。
 - 用环境变量 `LMB_API_KEY` 传入密钥，避免出现在 shell 历史里。
 - 请以 `sh llm-bench.sh` 方式运行下载的脚本（不要用 `curl … | sh`），否则交互提示无法读取终端。
 

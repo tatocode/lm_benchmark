@@ -149,7 +149,7 @@ Common flags: `--protocol openai|anthropic|gemini`, `--mode fixed|step|open`,
 
 Notes:
 
-- Requires `python3` 3.12+ (or `uvx`/`uv`, which provision a suitable runtime automatically). The launcher prefers `uvx`/`uv`, then `pipx`, then a temporary `venv`.
+- No package is installed: the launcher fetches the source into a cache directory and runs the CLI module directly, needing only `httpx`, `pydantic`, and `tiktoken`. If `uv` is present it provisions those deps (and Python 3.12+) automatically; otherwise it falls back to a local `venv` and requires `python3` 3.12+.
 - Provide the API key via the `LMB_API_KEY` environment variable to keep it out of shell history.
 - Run the downloaded script with `sh llm-bench.sh` (not `curl … | sh`), so the interactive prompts can read your terminal.
 
