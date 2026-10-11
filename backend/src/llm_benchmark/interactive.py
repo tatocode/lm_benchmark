@@ -1,6 +1,7 @@
-"""交互式命令行向导：逐步询问端点与压测配置后执行。
+"""Interactive command-line wizard: asks for endpoint and load-test config, then runs.
 
-面向没有图形界面的用户，通过 ``llm-bench --interactive`` 或重新导向启动。
+Aimed at headless users; launched via ``llm-bench --interactive`` or by running the
+CLI with no arguments on a TTY. English by default, switchable to Chinese.
 """
 
 from __future__ import annotations
@@ -8,17 +9,24 @@ from __future__ import annotations
 import argparse
 import asyncio
 import getpass
+import os
 import sys
 from time import perf_counter
 
 import httpx
 
-from .cli import DEFAULT_BASE, render_result, run_benchmark
+from .cli import DEFAULT_BASE, render_result, run_benchmark, tr
 from .providers import ProviderError, create_provider
 from .schemas import TaskConfig
 
 _YES = {"", "y", "yes", "是", "1"}
 _NO = {"n", "no", "否", "0"}
+_LANG_ZH = {"zh", "cn", "zh-cn", "chinese", "中文"}
+_LANG_EN = {"en", "english"}
+
+
+def _color(text: str, code: str, enabled: bool) -> str:
+    return f"\x1b[{code}m{text}\x1b[0m" if enabled else text
 
 
 def _ask(prompt: str, default: str = "") -> str:
@@ -39,30 +47,30 @@ def _ask_secret(prompt: str, default: str = "") -> str:
         return ""
 
 
-def _ask_int(prompt: str, default: int, minimum: int = 1) -> int:
+def _ask_int(prompt: str, default: int, lang: str, minimum: int = 1) -> int:
     while True:
         raw = _ask(prompt, str(default))
         try:
             value = int(raw)
         except ValueError:
-            print("  请输入整数")
+            print(f"  {tr(lang, 'err_int')}")
             continue
         if value < minimum:
-            print(f"  需 >= {minimum}")
+            print(f"  {tr(lang, 'err_ge', n=minimum)}")
             continue
         return value
 
 
-def _ask_float(prompt: str, default: float, minimum: float = 0.0) -> float:
+def _ask_float(prompt: str, default: float, lang: str, minimum: float = 0.0) -> float:
     while True:
         raw = _ask(prompt, str(default))
         try:
             value = float(raw)
         except ValueError:
-            print("  请输入数字")
+            print(f"  {tr(lang, 'err_num')}")
             continue
         if value < minimum:
-            print(f"  需 >= {minimum}")
+            print(f"  {tr(lang, 'err_ge', n=minimum)}")
             continue
         return value
 
@@ -76,13 +84,13 @@ def _ask_yesno(prompt: str, default: bool = True) -> bool:
             return False
 
 
-def _ask_choice(prompt: str, choices: list[str], default: str) -> str:
+def _ask_choice(prompt: str, choices: list[str], default: str, lang: str) -> str:
     joined = "/".join(choices)
     while True:
         raw = _ask(f"{prompt} ({joined})", default).lower()
         if raw in choices:
             return raw
-        print(f"  可选：{joined}")
+        print(f"  {tr(lang, 'err_choice', opts=joined)}")
 
 
 def _list_models(cfg: TaskConfig) -> list[str]:
@@ -97,7 +105,7 @@ def _list_models(cfg: TaskConfig) -> list[str]:
         return []
 
 
-def _probe(cfg: TaskConfig) -> None:
+def _probe(cfg: TaskConfig) -> tuple[bool, float | None, str]:
     async def go() -> tuple[bool, float | None, str]:
         async with httpx.AsyncClient() as client:
             provider = create_provider(cfg.protocol, cfg.base_url, cfg.api_key, cfg.model, client)
@@ -111,28 +119,33 @@ def _probe(cfg: TaskConfig) -> None:
                     if chunk.text:
                         text += chunk.text
                 ttft = (first - t0) * 1000 if first else None
-                return True, ttft, text[:60]
+                return True, ttft, text.strip()[:60]
             except ProviderError as exc:
                 return False, None, str(exc)[:200]
 
-    ok, ttft, info = asyncio.run(go())
-    if ok:
-        extra = f"  TTFT {ttft:.0f}ms · {info!r}" if ttft else ""
-        print(f"  ✔ 连接成功{extra}")
-    else:
-        print(f"  ✘ 连接失败: {info}")
+    return asyncio.run(go())
 
 
 def run_wizard(args: argparse.Namespace) -> int:
+    lang = getattr(args, "lang", "en") or "en"
+    color = sys.stdout.isatty()
+
     print()
-    print("╭───────────────────────────────────────────────╮")
-    print("│  LLM Benchmark · 交互式压测                   │")
-    print("╰───────────────────────────────────────────────╯")
-    print("提示：直接回车使用方括号内的默认值。")
+    raw_lang = _ask(tr(lang, "lang_prompt"), lang).strip().lower()
+    if raw_lang in _LANG_ZH:
+        lang = "zh"
+    elif raw_lang in _LANG_EN:
+        lang = "en"
+
+    title = tr(lang, "title")
+    print()
+    print(f"  {title}")
+    print("  " + "-" * 48)
+    print(f"  {tr(lang, 'hint')}")
     print()
 
     cfg = TaskConfig()
-    # 允许命令行参数作为向导默认值
+    # Allow command-line arguments to seed the wizard defaults.
     if args.protocol:
         cfg.protocol = args.protocol
     if args.base_url:
@@ -160,70 +173,100 @@ def run_wizard(args: argparse.Namespace) -> int:
     if args.levels:
         cfg.step_levels = _parse_levels(args.levels)
 
-    protocol = _ask_choice("协议 Protocol", ["openai", "anthropic", "gemini"], cfg.protocol)
+    protocol = _ask_choice("Protocol", ["openai", "anthropic", "gemini"], cfg.protocol, lang)
     cfg.protocol = protocol
 
     default_base = args.base_url or cfg.base_url or DEFAULT_BASE[protocol]
-    cfg.base_url = _ask("推理地址 Base URL", default_base)
+    cfg.base_url = _ask(tr(lang, "base_url"), default_base)
 
-    key_default = args.api_key or ""
-    cfg.api_key = _ask_secret("API Key（本地服务可留空）", key_default)
+    cfg.api_key = _ask_secret(tr(lang, "api_key"), args.api_key or "")
 
-    if _ask_yesno("获取可用模型列表", default=True):
+    if _ask_yesno(tr(lang, "fetch_models"), default=True):
         models = _list_models(cfg)
         if models:
-            print("  可用模型：")
+            print(f"  {tr(lang, 'models_available')}")
             for i, name in enumerate(models[:30], 1):
                 print(f"    {i:>2}. {name}")
-            raw = _ask("选择序号或直接输入模型名", args.model or (models[0] if models else ""))
+            raw = _ask(tr(lang, "choose_model"), args.model or (models[0] if models else ""))
             if raw.isdigit() and 1 <= int(raw) <= min(len(models), 30):
                 cfg.model = models[int(raw) - 1]
             else:
                 cfg.model = raw
         else:
-            print("  （未能获取，请手动输入）")
-            cfg.model = _ask("模型名 Model", args.model or cfg.model)
+            print(f"  {tr(lang, 'models_fail')}")
+            cfg.model = _ask(tr(lang, "model"), args.model or cfg.model)
     else:
-        cfg.model = _ask("模型名 Model", args.model or cfg.model)
+        cfg.model = _ask(tr(lang, "model"), args.model or cfg.model)
 
-    if _ask_yesno("现在测试连通性", default=True):
-        _probe(cfg)
-        print()
-
-    cfg.mode = _ask_choice("压测模式 Mode", ["fixed", "step", "open"], cfg.mode)
-    if cfg.mode == "fixed":
-        cfg.concurrency = _ask_int("并发数 concurrency", cfg.concurrency)
-        cfg.total_requests = _ask_int("总请求数 requests", cfg.total_requests)
-        cfg.fixed_duration_s = _ask_float("按时长（秒，0 表示按请求数）", cfg.fixed_duration_s)
-    elif cfg.mode == "step":
-        cfg.step_levels = _parse_levels(_ask("并发阶梯 levels", ",".join(map(str, cfg.step_levels))))
-        cfg.step_requests = _ask_int("每档请求数 step-requests", cfg.step_requests)
-        cfg.step_duration_s = _ask_float("每档时长（秒，0 表示按请求数）", cfg.step_duration_s)
-    else:
-        cfg.arrival_rate = _ask_float("到达速率 arrival-rate (req/s)", cfg.arrival_rate, minimum=0.01)
-        cfg.total_requests = _ask_int("总请求数 requests", cfg.total_requests)
-        cfg.fixed_duration_s = _ask_float("持续时长（秒，0 表示按请求数）", cfg.fixed_duration_s)
+    if _ask_yesno(tr(lang, "test_conn"), default=True):
+        ok, ttft, info = _probe(cfg)
+        if ok:
+            tag = _color("[OK]", "32", color)
+            detail = f"  TTFT {ttft:.0f} ms" if ttft else ""
+            print(f"  {tag} {tr(lang, 'conn_ok')}{detail}")
+            if info:
+                print(f"       {tr(lang, 'sample')}: {info!r}")
+        else:
+            tag = _color("[FAIL]", "31", color)
+            print(f"  {tag} {tr(lang, 'conn_fail')}: {info}")
 
     print()
-    cfg.input_tokens = _ask_int("输入长度 input-tokens", cfg.input_tokens)
-    cfg.max_output_tokens = _ask_int("最大输出 max-output-tokens", cfg.max_output_tokens)
-    cfg.timeout = _ask_float("单请求超时 timeout（秒）", cfg.timeout, minimum=1.0)
+    cfg.mode = _ask_choice("Mode", ["fixed", "step", "open"], cfg.mode, lang)
+    if cfg.mode == "fixed":
+        cfg.concurrency = _ask_int(tr(lang, "concurrency"), cfg.concurrency, lang)
+        cfg.total_requests = _ask_int(tr(lang, "requests"), cfg.total_requests, lang)
+        cfg.fixed_duration_s = _ask_float(tr(lang, "duration_fixed"), cfg.fixed_duration_s, lang)
+    elif cfg.mode == "step":
+        cfg.step_levels = _parse_levels(_ask(tr(lang, "levels"), ",".join(map(str, cfg.step_levels))))
+        cfg.step_requests = _ask_int(tr(lang, "step_requests"), cfg.step_requests, lang)
+        cfg.step_duration_s = _ask_float(tr(lang, "duration_step"), cfg.step_duration_s, lang)
+    else:
+        cfg.arrival_rate = _ask_float(tr(lang, "arrival_rate"), cfg.arrival_rate, lang, minimum=0.01)
+        cfg.total_requests = _ask_int(tr(lang, "requests"), cfg.total_requests, lang)
+        cfg.fixed_duration_s = _ask_float(tr(lang, "duration_fixed"), cfg.fixed_duration_s, lang)
+
+    print()
+    cfg.input_tokens = _ask_int(tr(lang, "input_tokens"), cfg.input_tokens, lang)
+    cfg.max_output_tokens = _ask_int(tr(lang, "max_output_tokens"), cfg.max_output_tokens, lang)
+    cfg.timeout = _ask_float(tr(lang, "timeout"), cfg.timeout, lang, minimum=1.0)
 
     image_spec = None
-    if _ask_yesno("启用视觉测试（附图片）", default=False):
-        image_spec = _ask("图片：builtin:<id> 或本地路径", "builtin:golden-gate")
+    if _ask_yesno(tr(lang, "vision"), default=False):
+        image_spec = _ask(tr(lang, "vision_image"), "builtin:golden-gate")
         cfg.with_image = True
 
     print()
-    print("即将运行：")
-    print(f"  {cfg.protocol} · {cfg.base_url} · {cfg.model}")
-    print(f"  ✘ {cfg.mode} · 输入 {cfg.input_tokens} / 输出 {cfg.max_output_tokens} tokens")
-    if not _ask_yesno("开始压测", default=True):
-        print("已取消。")
+    print(f"  {tr(lang, 'about')}:")
+    print(f"    {tr(lang, 'l_protocol'):<9}: {cfg.protocol}")
+    print(f"    {tr(lang, 'l_endpoint'):<9}: {cfg.base_url}")
+    print(f"    {tr(lang, 'l_model'):<9}: {cfg.model}")
+
+    if cfg.mode == "fixed":
+        mode_detail = (
+            f"fixed  ({tr(lang, 'l_conc')} {cfg.concurrency}, {tr(lang, 'l_req')} {cfg.total_requests})"
+        )
+    elif cfg.mode == "step":
+        levels = ",".join(map(str, cfg.step_levels))
+        mode_detail = f"step  (levels {levels}, {tr(lang, 'l_req')} {cfg.step_requests})"
+    else:
+        mode_detail = f"open  (arrival {cfg.arrival_rate} req/s, {tr(lang, 'l_req')} {cfg.total_requests})"
+    print(f"    {tr(lang, 'l_mode'):<9}: {mode_detail}")
+
+    print(
+        f"    {tr(lang, 'l_tokens'):<9}: "
+        f"{tr(lang, 'l_input')} {cfg.input_tokens} / {tr(lang, 'l_output')} {cfg.max_output_tokens}"
+    )
+    print(f"    {tr(lang, 'l_timeout'):<9}: {cfg.timeout:.0f} s")
+    if image_spec:
+        print(f"    {tr(lang, 'l_vision'):<9}: {image_spec}")
+    print()
+
+    if not _ask_yesno(tr(lang, "start"), default=True):
+        print(tr(lang, "cancelled"))
         return 0
 
     result = asyncio.run(run_benchmark(cfg, image_spec=image_spec))
-    render_result(result, color=sys.stdout.isatty())
+    render_result(result, color=sys.stdout.isatty(), lang=lang)
     return 0 if result["status"] == "done" else 1
 
 

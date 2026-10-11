@@ -137,7 +137,7 @@ def test_cli_interactive_wizard(monkeypatch, mock_server, capsys):
     monkeypatch.setattr("builtins.input", lambda *a, **k: "")
     monkeypatch.setattr(interactive, "_ask_secret", lambda *a, **k: "")
     monkeypatch.setattr(interactive, "_list_models", lambda cfg: [])
-    monkeypatch.setattr(interactive, "_probe", lambda cfg: None)
+    monkeypatch.setattr(interactive, "_probe", lambda cfg: (True, 12.0, "pong"))
 
     args = cli.build_parser().parse_args(
         [

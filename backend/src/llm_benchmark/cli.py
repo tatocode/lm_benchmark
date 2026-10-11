@@ -37,6 +37,178 @@ DEFAULT_BASE = {
     "gemini": "https://generativelanguage.googleapis.com",
 }
 
+TEXTS = {
+    "en": {
+        "title": "LLM Benchmark - interactive load test",
+        "lang_prompt": "Language / \u8bed\u8a00 (en/zh)",
+        "hint": "Press Enter to accept the default shown in brackets.",
+        "protocol": "Protocol",
+        "base_url": "Base URL",
+        "api_key": "API Key (leave blank for local servers)",
+        "fetch_models": "Fetch available models?",
+        "models_fail": "could not fetch models, please enter the model name manually",
+        "fetch_ok": "available models",
+        "models_available": "Available models:",
+        "choose_model": "Choose by number or type a model name",
+        "sample": "sample",
+        "model": "Model",
+        "test_conn": "Test connectivity now?",
+        "conn_ok": "Connected",
+        "conn_fail": "Connection failed",
+        "mode": "Mode",
+        "concurrency": "Concurrency",
+        "requests": "Total requests",
+        "levels": "Concurrency levels (comma-separated)",
+        "step_requests": "Requests per level",
+        "duration_fixed": "Duration in seconds (0 = by request count)",
+        "duration_step": "Seconds per level (0 = by request count)",
+        "arrival_rate": "Arrival rate (req/s)",
+        "input_tokens": "Input tokens",
+        "max_output_tokens": "Max output tokens",
+        "timeout": "Request timeout (s)",
+        "vision": "Enable vision test (attach an image)?",
+        "vision_image": "Image (builtin:<id> or local path)",
+        "about": "About to run",
+        "l_protocol": "protocol",
+        "l_endpoint": "endpoint",
+        "l_model": "model",
+        "l_mode": "mode",
+        "l_conc": "concurrency",
+        "l_req": "requests",
+        "l_tokens": "tokens",
+        "l_input": "input",
+        "l_output": "output",
+        "l_timeout": "timeout",
+        "l_vision": "vision",
+        "l_sample": "sample",
+        "start": "Start the benchmark?",
+        "cancelled": "Cancelled.",
+        "err_int": "please enter an integer",
+        "err_num": "please enter a number",
+        "err_ge": "must be >= {n}",
+        "err_choice": "options: {opts}",
+        "endpoint": "endpoint",
+        "model": "model",
+        "status": "status",
+        "per_concurrency": "per-concurrency",
+        "h_conc": "conc",
+        "h_rps": "req/s",
+        "h_out": "tok/s",
+        "h_ttft": "TTFT p95 (ms)",
+        "h_e2e": "E2E p95 (ms)",
+        "h_tpot": "TPOT p95 (ms)",
+        "h_err": "err (%)",
+        "overall": "overall metrics",
+        "r_completed": "completed",
+        "r_errors": "errors",
+        "r_elapsed": "elapsed",
+        "latency": "latency (ms)",
+        "avg": "avg",
+        "throughput": "throughput",
+        "r_output": "output",
+        "r_input": "input",
+        "r_requests": "requests",
+        "r_error_rate": "error rate",
+        "analysis": "analysis",
+        "a_recommended": "recommended concurrency",
+        "a_saturation": "saturation concurrency",
+        "a_knee": "knee concurrency",
+        "a_sla_max": "SLA max concurrency",
+        "a_sustainable": "max sustainable req/s",
+        "a_confidence": "confidence",
+    },
+    "zh": {
+        "title": "LLM Benchmark - \u4ea4\u4e92\u5f0f\u538b\u6d4b",
+        "lang_prompt": "\u8bed\u8a00 Language (en/zh)",
+        "hint": "\u76f4\u63a5\u6309\u56de\u8f66\u4f7f\u7528\u65b9\u62ec\u53f7\u4e2d\u7684\u9ed8\u8ba4\u503c\u3002",
+        "protocol": "\u534f\u8bae Protocol",
+        "base_url": "\u63a8\u7406\u5730\u5740 Base URL",
+        "api_key": "API Key\uff08\u672c\u5730\u670d\u52a1\u53ef\u7559\u7a7a\uff09",
+        "fetch_models": "\u83b7\u53d6\u53ef\u7528\u6a21\u578b\u5217\u8868",
+        "models_fail": "\u672a\u80fd\u83b7\u53d6\uff0c\u8bf7\u624b\u52a8\u8f93\u5165\u6a21\u578b\u540d",
+        "models_available": "\u53ef\u7528\u6a21\u578b\uff1a",
+        "choose_model": "\u9009\u62e9\u5e8f\u53f7\u6216\u76f4\u63a5\u8f93\u5165\u6a21\u578b\u540d",
+        "sample": "\u8fd4\u56de\u793a\u4f8b",
+        "model": "\u6a21\u578b\u540d Model",
+        "test_conn": "\u73b0\u5728\u6d4b\u8bd5\u8fde\u901a\u6027",
+        "conn_ok": "\u8fde\u63a5\u6210\u529f",
+        "conn_fail": "\u8fde\u63a5\u5931\u8d25",
+        "mode": "\u538b\u6d4b\u6a21\u5f0f Mode (fixed/step/open)",
+        "concurrency": "\u5e76\u53d1\u6570 concurrency",
+        "requests": "\u603b\u8bf7\u6c42\u6570 requests",
+        "levels": "\u9636\u68af\u5e76\u53d1\u7ea7\u522b\uff08\u9017\u53f7\u5206\u9694\uff09",
+        "step_requests": "\u6bcf\u6863\u8bf7\u6c42\u6570",
+        "duration_fixed": "\u6309\u65f6\u957f\uff08\u79d2\uff0c0 \u8868\u793a\u6309\u8bf7\u6c42\u6570\uff09",
+        "duration_step": "\u6bcf\u4e2a\u9636\u6bb5\u79d2\u6570\uff080 \u8868\u793a\u6309\u8bf7\u6c42\u6570\uff09",
+        "arrival_rate": "\u5230\u8fbe\u7387 arrival rate (req/s)",
+        "input_tokens": "\u8f93\u5165\u957f\u5ea6 input-tokens",
+        "max_output_tokens": "\u6700\u5927\u8f93\u51fa max-output-tokens",
+        "timeout": "\u5355\u8bf7\u6c42\u8d85\u65f6 timeout\uff08\u79d2\uff09",
+        "vision": "\u542f\u7528\u89c6\u89c9\u6d4b\u8bd5\uff08\u9644\u56fe\u7247\uff09",
+        "vision_image": "\u56fe\u7247\uff08builtin:<id> \u6216\u672c\u5730\u8def\u5f84\uff09",
+        "about": "\u5373\u5c06\u8fd0\u884c",
+        "l_protocol": "\u534f\u8bae",
+        "l_endpoint": "\u5730\u5740",
+        "l_model": "\u6a21\u578b",
+        "l_mode": "\u6a21\u5f0f",
+        "l_conc": "\u5e76\u53d1",
+        "l_req": "\u8bf7\u6c42\u6570",
+        "l_tokens": "\u4ee4\u724c",
+        "l_input": "\u8f93\u5165",
+        "l_output": "\u8f93\u51fa",
+        "l_timeout": "\u8d85\u65f6",
+        "l_vision": "\u89c6\u89c9",
+        "start": "\u5f00\u59cb\u538b\u6d4b",
+        "cancelled": "\u5df2\u53d6\u6d88\u3002",
+        "err_int": "\u8bf7\u8f93\u5165\u6574\u6570",
+        "err_num": "\u8bf7\u8f93\u5165\u6570\u5b57",
+        "err_ge": "\u5fc5\u987b >= {n}",
+        "err_choice": "\u53ef\u9009\u503c\uff1a{opts}",
+        "endpoint": "\u5730\u5740",
+        "model": "\u6a21\u578b",
+        "status": "\u72b6\u6001",
+        "per_concurrency": "\u5404\u5e76\u53d1\u5ea6",
+        "h_conc": "\u5e76\u53d1",
+        "h_rps": "\u8bf7\u6c42/\u79d2",
+        "h_out": "\u8f93\u51fa tok/s",
+        "h_ttft": "TTFT p95(\u6beb\u79d2)",
+        "h_e2e": "E2E p95(\u6beb\u79d2)",
+        "h_tpot": "TPOT p95(\u6beb\u79d2)",
+        "h_err": "\u9519\u8bef\u7387(%)",
+        "overall": "\u603b\u4f53\u6307\u6807",
+        "r_completed": "\u5b8c\u6210",
+        "r_errors": "\u9519\u8bef",
+        "r_elapsed": "\u8017\u65f6",
+        "latency": "\u5ef6\u8fdf (ms)",
+        "avg": "\u5e73\u5747",
+        "throughput": "\u541e\u5410\u91cf",
+        "r_output": "\u8f93\u51fa",
+        "r_input": "\u8f93\u5165",
+        "r_requests": "\u8bf7\u6c42",
+        "r_error_rate": "\u9519\u8bef\u7387",
+        "analysis": "\u5206\u6790",
+        "a_recommended": "\u63a8\u8350\u5e76\u53d1\u6570",
+        "a_saturation": "\u9971\u548c\u5e76\u53d1\u6570",
+        "a_knee": "\u62d0\u70b9\u5e76\u53d1\u6570",
+        "a_sla_max": "SLA \u6700\u5927\u5e76\u53d1\u6570",
+        "a_sustainable": "\u6700\u5927\u53ef\u6301\u7eed req/s",
+        "a_confidence": "\u7f6e\u4fe1\u5ea6",
+    },
+}
+
+
+def resolve_lang(value):
+    lang = (value or "").strip().lower()
+    if lang in ("zh", "cn", "zh-cn", "chinese", "\u4e2d\u6587"):
+        return "zh"
+    return "en"
+
+
+def tr(lang, key, **kw):
+    table = TEXTS.get(lang) or TEXTS["en"]
+    text = table.get(key) or TEXTS["en"].get(key, key)
+    return text.format(**kw) if kw else text
+
 
 class _Aborted(Exception):
     pass
@@ -58,41 +230,47 @@ def build_parser() -> argparse.ArgumentParser:
             "  llm-bench --interactive\n"
         ),
     )
-    p.add_argument("--interactive", "-i", action="store_true", help="进入交互式向导")
-    p.add_argument("--config", help="从 TaskConfig JSON 文件读取配置作为基准")
+    p.add_argument("--interactive", "-i", action="store_true", help="run the interactive wizard")
+    p.add_argument("--config", help="load a TaskConfig JSON file as the baseline")
+    p.add_argument(
+        "--lang",
+        choices=["en", "zh"],
+        default=None,
+        help="output language (default: en, or the LMB_LANG env var)",
+    )
 
     p.add_argument("--protocol", choices=["openai", "anthropic", "gemini"], default=None)
     p.add_argument("--base-url", dest="base_url", default=None)
     p.add_argument("--model", default=None)
-    p.add_argument("--api-key", dest="api_key", default=None, help="也可用环境变量 LMB_API_KEY")
+    p.add_argument("--api-key", dest="api_key", default=None, help="also honors the LMB_API_KEY env var")
 
     p.add_argument("--mode", choices=["fixed", "step", "open"], default=None)
-    p.add_argument("--concurrency", type=int, default=None, help="fixed/open 模式的并发数")
-    p.add_argument("--requests", type=int, default=None, help="总请求数（fixed / open）")
-    p.add_argument("--levels", default=None, help="阶梯并发，逗号分隔，如 1,2,4,8,16")
-    p.add_argument("--step-requests", dest="step_requests", type=int, default=None, help="每档请求数")
-    p.add_argument("--arrival-rate", dest="arrival_rate", type=float, default=None, help="open 模式到达速率 req/s")
+    p.add_argument("--concurrency", type=int, default=None, help="concurrency for fixed/open modes")
+    p.add_argument("--requests", type=int, default=None, help="total requests (fixed / open)")
+    p.add_argument("--levels", default=None, help="step-mode concurrency levels, comma-separated, e.g. 1,2,4,8,16")
+    p.add_argument("--step-requests", dest="step_requests", type=int, default=None, help="requests per step level")
+    p.add_argument("--arrival-rate", dest="arrival_rate", type=float, default=None, help="open-mode arrival rate in req/s")
     p.add_argument(
         "--duration",
         type=float,
         default=None,
-        help="按时长压测（秒）。fixed/open 用 fixed_duration，step 用 step_duration；0 表示按请求数",
+        help="run by duration in seconds (fixed/open use fixed_duration, step uses step_duration; 0 = by request count)",
     )
     p.add_argument("--input-tokens", dest="input_tokens", type=int, default=None)
-    p.add_argument("--max-output-tokens", dest="max_output_tokens", type=int, default=None, help="即 max_tokens")
-    p.add_argument("--timeout", type=float, default=None, help="单请求超时（秒）")
-    p.add_argument("--image", default=None, help="视觉测试图片：builtin:<id> 或本地文件路径")
-    p.add_argument("--questions", default=None, help="自定义问题，多个用 | 分隔")
+    p.add_argument("--max-output-tokens", dest="max_output_tokens", type=int, default=None, help="alias for max_tokens")
+    p.add_argument("--timeout", type=float, default=None, help="per-request timeout in seconds")
+    p.add_argument("--image", default=None, help="vision test image: builtin:<id> or a local file path")
+    p.add_argument("--questions", default=None, help="custom prompts, separated by |")
 
-    p.add_argument("--json", action="store_true", help="以 JSON 输出结果到 stdout")
-    p.add_argument("--quiet", action="store_true", help="不显示实时进度")
-    p.add_argument("--no-color", dest="no_color", action="store_true", help="禁用彩色输出")
+    p.add_argument("--json", action="store_true", help="print the result as JSON to stdout")
+    p.add_argument("--quiet", action="store_true", help="hide live progress")
+    p.add_argument("--no-color", dest="no_color", action="store_true", help="disable colored output")
     p.add_argument(
         "--fail-over",
         dest="fail_over",
         type=float,
         default=None,
-        help="错误率超过该阈值时以退出码 3 结束（便于 CI）",
+        help="exit with code 3 when the error rate exceeds this value (for CI)",
     )
     return p
 
@@ -365,8 +543,8 @@ class _Progress:
         total = str(planned) if planned else "∞"
         return (
             f"\r[{int(s['elapsed_s']):>4}s] {s['completed']}/{total} req  "
-            f"{s['rps']:.1f} rps  {s['output_tps']:.0f} tok/s  "
-            f"TTFT p95 {s['ttft_ms']['p95']:.0f}ms  err {s['error_rate'] * 100:.1f}%"
+            f"{s['rps']:.2f} req/s  {s['output_tps']:.0f} tok/s  "
+            f"TTFT p95 {s['ttft_ms']['p95']:.0f} ms  err {s['error_rate'] * 100:.1f}%"
         )
 
     def render(self, final: bool = False) -> None:
@@ -650,65 +828,84 @@ def _c(text: str, code: str, color: bool) -> str:
     return f"\x1b[{code}m{text}\x1b[0m" if color else text
 
 
-def _stats_line(label: str, stats: dict, unit: str = "ms") -> str:
-    return (
-        f"  {label:<6} avg {stats['avg']:>9.2f}  p50 {stats['p50']:>9.2f}  "
-        f"p95 {stats['p95']:>9.2f}  p99 {stats['p99']:>9.2f}  {unit}"
-    )
-
-
-def render_result(result: dict, *, color: bool = True) -> None:
+def render_result(result: dict, *, color: bool = True, lang: str = "en") -> None:
     cfg = result.get("config", {})
     s = result.get("summary", {})
     steps = result.get("steps") or []
     analysis = result.get("analysis") or {}
 
     print()
-    print(_c("── LLM Benchmark ────────────────────────────────", "1", color))
-    print(f"  endpoint : {cfg.get('base_url', '')}")
-    print(f"  model    : {cfg.get('model', '')}  ({cfg.get('protocol', '')})")
+    print(_c(f"  {tr(lang, 'title')}", "1", color))
+    print(f"  {tr(lang, 'endpoint'):<9}: {cfg.get('base_url', '')}")
+    print(f"  {tr(lang, 'model'):<9}: {cfg.get('model', '')}  ({cfg.get('protocol', '')})")
     if result.get("status") != "done":
-        print(_c(f"  status   : {result.get('status')}  {result.get('error', '')}", "31", color))
+        print(_c(f"  {tr(lang, 'status'):<9}: {result.get('status')}  {result.get('error', '')}", "31", color))
 
     if steps:
         print()
-        print(_c("  per-concurrency", "1", color))
-        header = (
-            f"  {'conc':>5}  {'rps':>8}  {'out t/s':>9}  "
-            f"{'TTFT p95':>9}  {'E2E p95':>9}  {'TPOT p95':>9}  {'err%':>6}"
+        print(_c(f"  {tr(lang, 'per_concurrency')}", "1", color))
+        print(
+            f"  {tr(lang, 'h_conc'):>6}  {tr(lang, 'h_rps'):>9}  {tr(lang, 'h_out'):>10}  "
+            f"{tr(lang, 'h_ttft'):>13}  {tr(lang, 'h_e2e'):>12}  {tr(lang, 'h_tpot'):>13}  "
+            f"{tr(lang, 'h_err'):>8}"
         )
-        print(header)
         for st in steps:
             print(
-                f"  {st['concurrency']:>5}  {st['rps']:>8.3f}  {st['output_tps']:>9.1f}  "
-                f"{st['ttft_p95']:>9.1f}  {st['e2e_p95']:>9.1f}  {st['tpot_p95']:>9.1f}  "
-                f"{st['error_rate'] * 100:>6.2f}"
+                f"  {st['concurrency']:>6}  {st['rps']:>9.3f}  {st['output_tps']:>10.1f}  "
+                f"{st['ttft_p95']:>13.1f}  {st['e2e_p95']:>12.1f}  {st['tpot_p95']:>13.1f}  "
+                f"{st['error_rate'] * 100:>8.2f}"
             )
 
     print()
-    print(_c("  overall metrics", "1", color))
-    print(f"  completed {s.get('completed', 0)}   errors {s.get('errors', 0)}   "
-          f"elapsed {s.get('elapsed_s', 0)}s")
-    print(_stats_line("TTFT", s.get("ttft_ms", {})))
-    print(_stats_line("TPOT", s.get("tpot_ms", {})))
-    print(_stats_line("ITL", s.get("itl_ms", {})))
-    print(_stats_line("E2E", s.get("e2e_ms", {})))
-    print(f"  output   {s.get('output_tps', 0):.1f} tok/s   "
-          f"input {s.get('input_tps', 0):.1f} tok/s   RPS {s.get('rps', 0):.3f}")
-    print(f"  error rate {s.get('error_rate', 0) * 100:.2f}%   "
-          f"{s.get('error_breakdown', {}) or ''}")
+    print(_c(f"  {tr(lang, 'overall')}", "1", color))
+    print(
+        f"    {tr(lang, 'r_completed'):<9}: {s.get('completed', 0):>6}     "
+        f"{tr(lang, 'r_errors'):<9}: {s.get('errors', 0):>6}     "
+        f"{tr(lang, 'r_elapsed'):<9}: {s.get('elapsed_s', 0):>7.2f} s"
+    )
+
+    print()
+    print(f"    {tr(lang, 'latency'):<13}{tr(lang, 'avg'):>10}{'p50':>10}{'p95':>10}{'p99':>10}")
+    for key in ("ttft_ms", "tpot_ms", "itl_ms", "e2e_ms"):
+        stats = s.get(key) or {}
+        print(
+            f"    {key.split('_')[0].upper():<13}"
+            f"{stats.get('avg', 0.0):>10.2f}{stats.get('p50', 0.0):>10.2f}"
+            f"{stats.get('p95', 0.0):>10.2f}{stats.get('p99', 0.0):>10.2f}"
+        )
+
+    print()
+    print(f"    {tr(lang, 'throughput')}")
+    print(f"      {tr(lang, 'r_output'):<9}: {s.get('output_tps', 0):>8.2f} tok/s")
+    print(f"      {tr(lang, 'r_input'):<9}: {s.get('input_tps', 0):>8.2f} tok/s")
+    print(f"      {tr(lang, 'r_requests'):<9}: {s.get('rps', 0):>8.3f} req/s")
+
+    print()
+    rate = s.get("error_rate", 0) * 100
+    breakdown = s.get("error_breakdown") or {}
+    extra = ""
+    if breakdown:
+        pretty = "  ".join(f"{k}={v}" for k, v in breakdown.items())
+        extra = f"  ({pretty})"
+    rate_color = "32" if rate == 0 else ("33" if rate < 5 else "31")
+    print(f"    {tr(lang, 'r_error_rate'):<9}: {_c(f'{rate:.2f}%', rate_color, color)}{extra}")
 
     if analysis and analysis.get("ok"):
+        def _v(x):
+            return "-" if x is None else x
+
         print()
-        print(_c("  analysis", "1", color))
-        rec = analysis.get("recommended_concurrency")
-        sat = (analysis.get("saturation") or {}).get("concurrency")
-        knee = (analysis.get("knee") or {}).get("concurrency")
-        print(f"  recommended concurrency : {rec}")
-        print(f"  saturation              : {sat}   knee: {knee}   "
-              f"SLA max: {analysis.get('sla_max_concurrency')}")
-        print(f"  max sustainable rps     : {analysis.get('max_sustainable_rps')}   "
-              f"confidence: {analysis.get('confidence')}")
+        print(_c(f"  {tr(lang, 'analysis')}", "1", color))
+        print(f"    {tr(lang, 'a_recommended'):<24}: {_v(analysis.get('recommended_concurrency'))}")
+        print(
+            f"    {tr(lang, 'a_saturation'):<24}: {_v((analysis.get('saturation') or {}).get('concurrency'))}     "
+            f"{tr(lang, 'a_knee'):<16}: {_v((analysis.get('knee') or {}).get('concurrency'))}"
+        )
+        print(f"    {tr(lang, 'a_sla_max'):<24}: {_v(analysis.get('sla_max_concurrency'))}")
+        print(
+            f"    {tr(lang, 'a_sustainable'):<24}: {_v(analysis.get('max_sustainable_rps'))}     "
+            f"{tr(lang, 'a_confidence'):<16}: {_v(analysis.get('confidence'))}"
+        )
     print()
 
 
@@ -719,6 +916,7 @@ def execute(cfg: TaskConfig, args: argparse.Namespace, *, image_spec: str | None
     as_json = getattr(args, "json", False)
     quiet = getattr(args, "quiet", False)
     no_color = getattr(args, "no_color", False)
+    lang = getattr(args, "lang", "en") or "en"
     sys.stderr.write(
         f"running {cfg.mode} benchmark against {cfg.base_url or DEFAULT_BASE[cfg.protocol]} "
         f"({cfg.model})...\n"
@@ -727,7 +925,7 @@ def execute(cfg: TaskConfig, args: argparse.Namespace, *, image_spec: str | None
     if as_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
-        render_result(result, color=(not no_color and sys.stdout.isatty()))
+        render_result(result, color=(not no_color and sys.stdout.isatty()), lang=lang)
     fail_over = getattr(args, "fail_over", None)
     if fail_over is not None and result["summary"].get("error_rate", 0) > fail_over:
         sys.stderr.write(
@@ -740,6 +938,7 @@ def execute(cfg: TaskConfig, args: argparse.Namespace, *, image_spec: str | None
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    args.lang = resolve_lang(args.lang or os.environ.get("LMB_LANG"))
     interactive = args.interactive or (
         args.base_url is None
         and args.model is None

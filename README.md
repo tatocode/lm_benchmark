@@ -147,6 +147,10 @@ Common flags: `--protocol openai|anthropic|gemini`, `--mode fixed|step|open`,
 `--duration`, `--input-tokens`, `--max-output-tokens`, `--timeout`, `--image`,
 `--json` (machine-readable output), and `--fail-over <rate>` (exits with code 3 for CI).
 
+The CLI is in English by default. Switch to Chinese with `--lang zh` (or the
+`LMB_LANG=zh` environment variable); the interactive wizard also asks for the
+language on the first prompt.
+
 Notes:
 
 - No package is installed: the launcher fetches the source into a cache directory and runs the CLI module directly, needing only `httpx`, `pydantic`, and `tiktoken`. If `uv` is present it provisions those deps (and Python 3.12+) automatically; otherwise it falls back to a local `venv` and requires `python3` 3.12+.

@@ -151,6 +151,9 @@ uv run llm-bench --base-url http://127.0.0.1:11434/v1 --model llama3 \
 `--duration`、`--input-tokens`、`--max-output-tokens`、`--timeout`、`--image`、
 `--json`（机器可读输出）、`--fail-over <rate>`（超阈值时以退出码 3 结束，便于 CI）。
 
+CLI 默认使用英文，可用 `--lang zh`（或环境变量 `LMB_LANG=zh`）切换为中文；
+交互式向导也会在第一个提示中询问语言。
+
 注意：
 
 - 不会安装任何包：启动脚本把源码取到缓存目录，只用 `httpx`、`pydantic`、`tiktoken` 三个依赖直接运行 CLI 模块。若已装 `uv`，会自动准备依赖与 Python 3.12+；否则回退到本地 `venv`，此时需要 `python3` 3.12+。
