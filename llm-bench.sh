@@ -9,15 +9,16 @@
 # 也可直接传参做非交互式压测：
 #   sh llm-bench.sh --base-url http://localhost:11434/v1 --model llama3 --mode step --levels 1,2,4,8
 #
-# 原理：把仓库源码取到缓存目录，仅安装运行所需的三个依赖（httpx / pydantic / tiktoken），
-# 然后直接运行 CLI 模块——不会安装 llm-benchmark 包，也不会拉取 fastapi 等服务器依赖。
+# 原理：每次运行都会把仓库源码（当前分支最新版）取到缓存目录，仅准备运行所需的三个
+# 依赖（httpx / pydantic / tiktoken），然后直接运行 CLI 模块——不会安装 llm-benchmark
+# 包，也不会拉取 fastapi 等服务器依赖。因此「curl 最新脚本 + 运行」始终得到最新代码。
 #
 # 可选环境变量：
 #   LMB_REPO / LMB_BRANCH   源码仓库与分支（默认 tatocode/lm_benchmark@main）
 #   LMB_SRC                 直接指定本地仓库路径（跳过下载）
 #   LMB_CACHE               缓存目录（默认 ~/.cache/llm-bench）
 #   LMB_TARBALL             直接指定源码 tarball 地址
-#   LMB_REFRESH=1           强制重新下载源码
+#   LMB_OFFLINE=1           跳过联网，直接使用缓存源码（缓存缺失则报错）
 #   LMB_PYTHON              指定 Python 版本（默认 3.12）
 #
 set -eu
@@ -57,7 +58,8 @@ if [ -n "$SRC" ]; then
     looks_like_src "$SRC" || die "LMB_SRC 指向的目录里没有 backend/src/llm_benchmark/cli.py：$SRC"
 elif looks_like_src "$PWD"; then
     SRC="$PWD"
-elif [ -z "${LMB_REFRESH:-}" ] && looks_like_src "${CACHE}/src"; then
+elif [ -n "${LMB_OFFLINE:-}" ]; then
+    looks_like_src "${CACHE}/src" || die "LMB_OFFLINE=1 但缓存中没有源码：${CACHE}/src"
     SRC="${CACHE}/src"
 else
     have curl || die "需要 curl 下载源码（或设置 LMB_SRC 指向本地仓库）"
@@ -75,13 +77,26 @@ else
                 ;;
         esac
     fi
-    printf '首次运行：正在获取源码（%s）...\n' "$url" >&2
+    printf '正在获取源码（%s）...\n' "$BRANCH" >&2
     mkdir -p "$CACHE"
     tmp="${CACHE}/.src.$$.tar.gz"
-    curl -fsSL "$url" -o "$tmp" || die "下载源码失败：$url"
-    rm -rf "${CACHE}/src"
-    mkdir -p "${CACHE}/src"
-    tar -xzf "$tmp" -C "${CACHE}/src" --strip-components=1 || die "解压源码失败"
+    if curl -fsSL "$url" -o "$tmp"; then
+        rm -rf "${CACHE}/src.tmp"
+        mkdir -p "${CACHE}/src.tmp"
+        if tar -xzf "$tmp" -C "${CACHE}/src.tmp" --strip-components=1; then
+            rm -rf "${CACHE}/src"
+            mv "${CACHE}/src.tmp" "${CACHE}/src"
+        else
+            rm -rf "${CACHE}/src.tmp"
+            rm -f "$tmp"
+            die "解压源码失败"
+        fi
+    elif looks_like_src "${CACHE}/src"; then
+        printf 'warning: 获取源码失败，改用缓存副本（联网正常时请重试；离线可设 LMB_OFFLINE=1）\n' >&2
+    else
+        rm -f "$tmp"
+        die "下载源码失败：$url"
+    fi
     rm -f "$tmp"
     SRC="${CACHE}/src"
 fi

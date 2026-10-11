@@ -153,7 +153,7 @@ language on the first prompt.
 
 Notes:
 
-- No package is installed: the launcher fetches the source into a cache directory and runs the CLI module directly, needing only `httpx`, `pydantic`, and `tiktoken`. If `uv` is present it provisions those deps (and Python 3.12+) automatically; otherwise it falls back to a local `venv` and requires `python3` 3.12+.
+- No package is installed: on each run the launcher fetches the latest source for the branch into a cache directory and runs the CLI module directly, needing only `httpx`, `pydantic`, and `tiktoken`. If `uv` is present it provisions those deps (and Python 3.12+) automatically; otherwise it falls back to a local `venv` and requires `python3` 3.12+. Because the source is refreshed every run, a freshly `curl`-ed script always runs the latest code; set `LMB_OFFLINE=1` to skip the download and use the cached copy.
 - Provide the API key via the `LMB_API_KEY` environment variable to keep it out of shell history.
 - Run the downloaded script with `sh llm-bench.sh` (not `curl … | sh`), so the interactive prompts can read your terminal.
 

@@ -21,8 +21,6 @@ from .schemas import TaskConfig
 
 _YES = {"", "y", "yes", "是", "1"}
 _NO = {"n", "no", "否", "0"}
-_LANG_ZH = {"zh", "cn", "zh-cn", "chinese", "中文"}
-_LANG_EN = {"en", "english"}
 
 
 def _color(text: str, code: str, enabled: bool) -> str:
@@ -131,11 +129,9 @@ def run_wizard(args: argparse.Namespace) -> int:
     color = sys.stdout.isatty()
 
     print()
-    raw_lang = _ask(tr(lang, "lang_prompt"), lang).strip().lower()
-    if raw_lang in _LANG_ZH:
-        lang = "zh"
-    elif raw_lang in _LANG_EN:
-        lang = "en"
+    if not getattr(args, "lang_explicit", False):
+        if _ask_yesno("Switch to Chinese / 切换到中文?", default=False):
+            lang = "zh"
 
     title = tr(lang, "title")
     print()

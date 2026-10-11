@@ -938,7 +938,9 @@ def execute(cfg: TaskConfig, args: argparse.Namespace, *, image_spec: str | None
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    explicit = args.lang is not None or bool(os.environ.get("LMB_LANG"))
     args.lang = resolve_lang(args.lang or os.environ.get("LMB_LANG"))
+    args.lang_explicit = explicit
     interactive = args.interactive or (
         args.base_url is None
         and args.model is None

@@ -156,7 +156,7 @@ CLI 默认使用英文，可用 `--lang zh`（或环境变量 `LMB_LANG=zh`）�
 
 注意：
 
-- 不会安装任何包：启动脚本把源码取到缓存目录，只用 `httpx`、`pydantic`、`tiktoken` 三个依赖直接运行 CLI 模块。若已装 `uv`，会自动准备依赖与 Python 3.12+；否则回退到本地 `venv`，此时需要 `python3` 3.12+。
+- 不会安装任何包：每次运行都会把当前分支的最新源码取到缓存目录，只用 `httpx`、`pydantic`、`tiktoken` 三个依赖直接运行 CLI 模块。若已装 `uv`，会自动准备依赖与 Python 3.12+；否则回退到本地 `venv`，此时需要 `python3` 3.12+。由于每次都会刷新源码，重新 `curl` 到的脚本始终运行最新代码；设 `LMB_OFFLINE=1` 可跳过下载、直接使用缓存副本。
 - 用环境变量 `LMB_API_KEY` 传入密钥，避免出现在 shell 历史里。
 - 请以 `sh llm-bench.sh` 方式运行下载的脚本（不要用 `curl … | sh`），否则交互提示无法读取终端。
 
