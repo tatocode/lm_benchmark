@@ -27,15 +27,28 @@ export function fmtElapsed(s?: number | null): string {
   return `${m}m${Math.round(s % 60)}s`;
 }
 
-export function timeAgo(iso: string | null | undefined): string {
+export function timeAgo(
+  iso: string | null | undefined,
+  lang: string = "en",
+): string {
   if (!iso) return "-";
   const t = new Date(iso).getTime();
-  const diff = Date.now() - t;
-  const sec = Math.floor(diff / 1000);
-  if (sec < 60) return `${sec}秒前`;
-  const min = Math.floor(sec / 60);
-  if (min < 60) return `${min}分钟前`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}小时前`;
-  return new Date(iso).toLocaleString();
+  if (Number.isNaN(t)) return "-";
+  const diff = t - Date.now();
+  const abs = Math.abs(diff);
+  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ["year", 31536000000],
+    ["month", 2592000000],
+    ["day", 86400000],
+    ["hour", 3600000],
+    ["minute", 60000],
+    ["second", 1000],
+  ];
+  for (const [unit, ms] of units) {
+    if (abs >= ms || unit === "second") {
+      return rtf.format(Math.round(diff / ms), unit);
+    }
+  }
+  return "-";
 }

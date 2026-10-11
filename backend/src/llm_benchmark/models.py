@@ -1,4 +1,3 @@
-import json
 import uuid
 from datetime import datetime, timezone
 
@@ -85,7 +84,3 @@ class ImageRow(Base):
     data: Mapped[bytes] = mapped_column(LargeBinary)
     source: Mapped[str] = mapped_column(String(20), default="upload")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
-
-
-def task_config_dump(config: dict) -> str:
-    return json.dumps(config, ensure_ascii=False)

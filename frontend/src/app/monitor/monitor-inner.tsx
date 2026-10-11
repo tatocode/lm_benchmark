@@ -26,29 +26,15 @@ import { fmtElapsed, fmtMs, fmtNum, fmtPct, fmtTps, timeAgo } from "@/lib/format
 import { useI18n } from "@/lib/i18n";
 import type { TKey } from "@/lib/i18n";
 import { saveLastConfig } from "@/lib/last-config";
+import { STATUS_META, TERMINAL_STATUSES } from "@/lib/task-status";
 import type {
   Analysis,
   RecordOut,
   SSEEvent,
   StepSummary,
   TaskConfig,
-  TaskStatus,
 } from "@/lib/types";
 import { useTaskStore } from "@/store/use-task-store";
-
-const TERMINAL: TaskStatus[] = ["done", "failed", "cancelled", "interrupted"];
-
-const STATUS_META: Record<
-  TaskStatus,
-  { labelKey: TKey; variant: "success" | "warning" | "destructive" | "secondary" }
-> = {
-  pending: { labelKey: "common.status.pending", variant: "secondary" },
-  running: { labelKey: "common.status.running", variant: "warning" },
-  done: { labelKey: "common.status.done", variant: "success" },
-  failed: { labelKey: "common.status.failed", variant: "destructive" },
-  cancelled: { labelKey: "common.status.cancelled", variant: "secondary" },
-  interrupted: { labelKey: "common.status.interrupted", variant: "secondary" },
-};
 
 function baseChart(extra: object) {
   return {
@@ -61,7 +47,7 @@ function baseChart(extra: object) {
 export default function MonitorInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const taskId = searchParams.get("id") ?? "";
   const store = useTaskStore();
   const [taskMeta, setTaskMeta] = React.useState<{
@@ -102,7 +88,7 @@ export default function MonitorInner() {
   useSSE(
     taskId || null,
     (event: SSEEvent) => store.apply(event),
-    taskId !== "" && !TERMINAL.includes(store.status),
+    taskId !== "" && !TERMINAL_STATUSES.includes(store.status),
   );
 
   const { status, error, records, snapshot, steps, throughput, analysis, autoStopReason } =
@@ -122,7 +108,7 @@ export default function MonitorInner() {
             Math.round(((snapshot?.elapsed_s ?? 0) / durationS) * 100),
           )
         : 0;
-  const isTerminal = TERMINAL.includes(status);
+  const isTerminal = TERMINAL_STATUSES.includes(status);
   const stepMode = steps.length > 0;
 
   const onCancel = async () => {
@@ -408,7 +394,7 @@ export default function MonitorInner() {
             <div className="mt-0.5 truncate text-xs text-muted-foreground">
               {t("monitor.created", {
                 base: taskMeta?.base_url || "",
-                time: timeAgo(taskMeta?.created_at ?? ""),
+                time: timeAgo(taskMeta?.created_at ?? "", lang),
               })}
             </div>
           </div>

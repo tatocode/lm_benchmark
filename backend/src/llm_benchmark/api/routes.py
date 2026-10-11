@@ -42,10 +42,27 @@ def _iso(dt: datetime | None) -> str | None:
     return dt.isoformat() if dt else None
 
 
-def _row_to_summary(row: TaskRow, config_json: str | None = None) -> TaskSummary:
-    cfg = TaskConfig.model_validate_json(config_json or row.config_json)
-    dump = cfg.model_dump()
-    dump["api_key"] = ""
+def _record_to_dict(r: RecordRow) -> dict:
+    return {
+        "idx": r.idx,
+        "step": r.step,
+        "status": r.status,
+        "ttft_ms": r.ttft_ms,
+        "e2e_ms": r.e2e_ms,
+        "tpot_ms": r.tpot_ms,
+        "output_tokens": r.output_tokens,
+        "input_tokens": r.input_tokens,
+        "tok_per_s": r.tok_per_s,
+        "itl_p50_ms": r.itl_p50_ms,
+        "error_class": r.error_class,
+        "error": r.error,
+        "t_start": r.t_start,
+        "t_end": r.t_end,
+    }
+
+
+def _row_to_summary(row: TaskRow) -> TaskSummary:
+    cfg = TaskConfig.model_validate_json(row.config_json)
     return TaskSummary(
         id=row.id,
         name=row.name,
@@ -57,7 +74,7 @@ def _row_to_summary(row: TaskRow, config_json: str | None = None) -> TaskSummary
         created_at=_iso(row.created_at) or "",
         started_at=_iso(row.started_at),
         finished_at=_iso(row.finished_at),
-        config=TaskConfig.model_validate(dump),
+        config=cfg.model_copy(update={"api_key": ""}),
         summary=json.loads(row.summary_json or "{}"),
         steps=json.loads(row.steps_json or "[]"),
         analysis=json.loads(row.analysis_json or "{}"),
@@ -127,25 +144,7 @@ async def get_task(task_id: str) -> TaskDetail:
         status = rt.status
         error = rt.error
     else:
-        records = [
-            RecordOut(
-                idx=r.idx,
-                step=r.step,
-                status=r.status,
-                ttft_ms=r.ttft_ms,
-                e2e_ms=r.e2e_ms,
-                tpot_ms=r.tpot_ms,
-                output_tokens=r.output_tokens,
-                input_tokens=r.input_tokens,
-                tok_per_s=r.tok_per_s,
-                itl_p50_ms=r.itl_p50_ms,
-                error_class=r.error_class,
-                error=r.error,
-                t_start=r.t_start,
-                t_end=r.t_end,
-            )
-            for r in db_records
-        ]
+        records = [RecordOut(**_record_to_dict(r)) for r in db_records]
         steps = json.loads(row.steps_json or "[]")
         summary = json.loads(row.summary_json or "{}")
         analysis = json.loads(row.analysis_json or "{}")
@@ -216,25 +215,7 @@ async def task_events(task_id: str) -> StreamingResponse:
                         .order_by(RecordRow.idx)
                     )
                     db_records = result.scalars().all()
-                records = [
-                    {
-                        "idx": r.idx,
-                        "step": r.step,
-                        "status": r.status,
-                        "ttft_ms": r.ttft_ms,
-                        "e2e_ms": r.e2e_ms,
-                        "tpot_ms": r.tpot_ms,
-                        "output_tokens": r.output_tokens,
-                        "input_tokens": r.input_tokens,
-                        "tok_per_s": r.tok_per_s,
-                        "itl_p50_ms": r.itl_p50_ms,
-                        "error_class": r.error_class,
-                        "error": r.error,
-                        "t_start": r.t_start,
-                        "t_end": r.t_end,
-                    }
-                    for r in db_records
-                ]
+                records = [_record_to_dict(r) for r in db_records]
                 cfg_total = json.loads(row.summary_json or "{}").get("planned") or len(
                     records
                 )

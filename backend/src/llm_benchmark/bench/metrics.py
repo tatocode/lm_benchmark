@@ -57,7 +57,6 @@ class RecordResult:
     error: str = ""
     t_start: float = 0.0
     t_end: float = 0.0
-    token_source: str = "api"
     itls: list[float] = field(default_factory=list)
 
     def as_dict(self) -> dict:
@@ -208,8 +207,6 @@ def aggregate_records(records: list[dict], planned: int = 0) -> Aggregator:
             t_start=r.get("t_start", 0.0),
             t_end=r.get("t_end", 0.0),
         )
-        if rec.itl_p50_ms is not None and not rec.itls:
-            rec.itls = [rec.itl_p50_ms]
         agg.add(rec)
     agg.t_start = perf_counter() - 1.0
     return agg

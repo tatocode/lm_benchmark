@@ -16,7 +16,15 @@ import MetricCard from "@/components/metric-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -29,26 +37,9 @@ import {
 import { api } from "@/lib/api";
 import { fmtMs, fmtNum, fmtPct, fmtTps, timeAgo } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
-import type { TKey } from "@/lib/i18n";
 import { saveLastConfig } from "@/lib/last-config";
-import type { TaskStatus, TaskSummary } from "@/lib/types";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const STATUS_META: Record<TaskStatus, { labelKey: TKey; variant: "success" | "warning" | "destructive" | "secondary" }> = {
-  pending: { labelKey: "common.status.pending", variant: "secondary" },
-  running: { labelKey: "common.status.running", variant: "warning" },
-  done: { labelKey: "common.status.done", variant: "success" },
-  failed: { labelKey: "common.status.failed", variant: "destructive" },
-  cancelled: { labelKey: "common.status.cancelled", variant: "secondary" },
-  interrupted: { labelKey: "common.status.interrupted", variant: "secondary" },
-};
+import { STATUS_META } from "@/lib/task-status";
+import type { TaskSummary } from "@/lib/types";
 
 const PROTOCOL_LABEL: Record<string, string> = {
   openai: "OpenAI",
@@ -58,7 +49,7 @@ const PROTOCOL_LABEL: Record<string, string> = {
 
 export default function HistoryPage() {
   const router = useRouter();
-  const { t: i18n } = useI18n();
+  const { t: i18n, lang } = useI18n();
   const [tasks, setTasks] = React.useState<TaskSummary[]>([]);
   const [selected, setSelected] = React.useState<string[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -358,7 +349,7 @@ export default function HistoryPage() {
                     <TableCell>{fmtMs(t.summary.tpot_ms?.avg)}</TableCell>
                     <TableCell>{fmtNum(t.summary.rps)}</TableCell>
                     <TableCell>{fmtPct(t.summary.error_rate)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{timeAgo(t.created_at)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{timeAgo(t.created_at, lang)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <button

@@ -21,8 +21,6 @@ if not MAP_LOCALHOST_HOST and IN_DOCKER:
     MAP_LOCALHOST_HOST = "host.docker.internal"
 
 SNAPSHOT_INTERVAL = 0.5
-DEFAULT_TIMEOUT = 120.0
-DEFAULT_MAX_OUTPUT_TOKENS = 256
 
 
 def resolve_endpoint(endpoint: str) -> str:

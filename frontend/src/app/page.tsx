@@ -78,24 +78,21 @@ const PARAM_KEYS = new Set<keyof TaskConfig>([
 
 const PROTOCOL_META: Record<
   Protocol,
-  { labelKey: TKey; defaultBase: string; basePlaceholder: string; keyLabel: string }
+  { labelKey: TKey; defaultBase: string; keyLabel: string }
 > = {
   openai: {
     labelKey: "common.protocol.openai",
     defaultBase: "https://api.openai.com/v1",
-    basePlaceholder: "https://api.openai.com/v1",
     keyLabel: "API Key",
   },
   anthropic: {
     labelKey: "common.protocol.anthropic",
     defaultBase: "https://api.anthropic.com",
-    basePlaceholder: "https://api.anthropic.com",
     keyLabel: "x-api-key",
   },
   gemini: {
     labelKey: "common.protocol.gemini",
     defaultBase: "https://generativelanguage.googleapis.com",
-    basePlaceholder: "https://generativelanguage.googleapis.com",
     keyLabel: "API Key",
   },
 };
@@ -843,7 +840,7 @@ export default function NewTestPage() {
                 tip={t("home.field.baseUrlTip")}
               >
                 <Input
-                  placeholder={meta.basePlaceholder}
+                  placeholder={meta.defaultBase}
                   value={cfg.base_url}
                   onChange={(e) => set("base_url", e.target.value)}
                   onBlur={loadModels}
