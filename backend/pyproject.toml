@@ -21,6 +21,7 @@ dependencies = [
 
 [project.scripts]
 llm-benchmark = "llm_benchmark:main"
+llm-bench = "llm_benchmark.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.11.22,<0.12.0"]

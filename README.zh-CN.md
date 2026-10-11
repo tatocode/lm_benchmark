@@ -27,6 +27,7 @@
 - **历史记录** —— 任务与每个请求明细存入 SQLite，支持多任务指标对比。
 - **预设模板** —— 保存并一键恢复整套配置。
 - **单端口部署** —— 后端在同一端口同时托管静态前端与 API。
+- **命令行模式** —— 一条 curl 命令下载脚本即可进入交互式向导，复用同一套测量引擎，适合无图形界面的服务器。
 - **中英双语界面** —— 运行时可切换。
 
 ## 指标
@@ -117,6 +118,44 @@ Remove-Item backend/static -Recurse -Force
 Copy-Item frontend/out backend/static -Recurse
 uv run llm-benchmark   # 只需 8000 一个端口同时提供页面与 API
 ```
+
+## 命令行使用（无界面）
+
+在没有图形界面的服务器或纯终端里，可用一行命令启动交互式向导，无需 Web 界面。它复用同一套测量引擎
+（TTFT、吞吐、TPOT、ITL、错误率）与阶梯分析。
+
+```bash
+# 交互式向导：逐步询问端点与压测配置后执行
+curl -fsSL -o llm-bench.sh https://raw.githubusercontent.com/tatocode/lm_benchmark/main/llm-bench.sh
+sh llm-bench.sh
+```
+
+也可以直接传参做非交互式、可脚本化的压测：
+
+```bash
+sh llm-bench.sh --base-url http://127.0.0.1:11434/v1 --model llama3 \
+  --mode step --levels 1,2,4,8,16 --step-requests 10
+```
+
+如果已经 clone 了仓库，无需该脚本，直接用包内入口即可：
+
+```bash
+cd backend
+uv run llm-bench --interactive
+uv run llm-bench --base-url http://127.0.0.1:11434/v1 --model llama3 \
+  --mode fixed --concurrency 8 --requests 50
+```
+
+常用参数：`--protocol openai|anthropic|gemini`、`--mode fixed|step|open`、
+`--concurrency`、`--requests`、`--levels`、`--step-requests`、`--arrival-rate`、
+`--duration`、`--input-tokens`、`--max-output-tokens`、`--timeout`、`--image`、
+`--json`（机器可读输出）、`--fail-over <rate>`（超阈值时以退出码 3 结束，便于 CI）。
+
+注意：
+
+- 需要 `python3` 3.12+（或已安装 `uvx`/`uv`，可自动准备合适的运行时）。启动脚本会优先使用 `uvx`/`uv`，其次 `pipx`，最后回退到临时 `venv`。
+- 用环境变量 `LMB_API_KEY` 传入密钥，避免出现在 shell 历史里。
+- 请以 `sh llm-bench.sh` 方式运行下载的脚本（不要用 `curl … | sh`），否则交互提示无法读取终端。
 
 ## 使用方式
 

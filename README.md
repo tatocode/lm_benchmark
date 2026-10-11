@@ -25,6 +25,7 @@ English | [中文说明](README.zh-CN.md)
 - **Run history** — tasks and per-request records are stored in SQLite, with multi-run comparison.
 - **Presets** — save and restore complete configurations.
 - **Single-port deployment** — the backend serves the statically exported frontend and the API on the same port.
+- **Command-line mode** — a curl-able script launches an interactive wizard for headless servers, reusing the same measurement engine.
 - **Bilingual UI** — English and Chinese, switchable at runtime.
 
 ## Metrics
@@ -114,6 +115,43 @@ Remove-Item backend/static -Recurse -Force
 Copy-Item frontend/out backend/static -Recurse
 uv run llm-benchmark   # serves both the UI and the API on port 8000
 ```
+
+## Command-line usage (no GUI)
+
+For headless servers or plain terminals, a one-line launcher starts an interactive wizard — no web UI required. It reuses the same measurement engine (TTFT, throughput, TPOT, ITL, error rate) and the step-sweep analysis.
+
+```bash
+# Interactive wizard: prompts for endpoint and workload, then runs
+curl -fsSL -o llm-bench.sh https://raw.githubusercontent.com/tatocode/lm_benchmark/main/llm-bench.sh
+sh llm-bench.sh
+```
+
+Or pass flags directly for a scriptable, non-interactive run:
+
+```bash
+sh llm-bench.sh --base-url http://127.0.0.1:11434/v1 --model llama3 \
+  --mode step --levels 1,2,4,8,16 --step-requests 10
+```
+
+If you cloned the repo, the same entry point works without the launcher (it reuses the installed package):
+
+```bash
+cd backend
+uv run llm-bench --interactive
+uv run llm-bench --base-url http://127.0.0.1:11434/v1 --model llama3 \
+  --mode fixed --concurrency 8 --requests 50
+```
+
+Common flags: `--protocol openai|anthropic|gemini`, `--mode fixed|step|open`,
+`--concurrency`, `--requests`, `--levels`, `--step-requests`, `--arrival-rate`,
+`--duration`, `--input-tokens`, `--max-output-tokens`, `--timeout`, `--image`,
+`--json` (machine-readable output), and `--fail-over <rate>` (exits with code 3 for CI).
+
+Notes:
+
+- Requires `python3` 3.12+ (or `uvx`/`uv`, which provision a suitable runtime automatically). The launcher prefers `uvx`/`uv`, then `pipx`, then a temporary `venv`.
+- Provide the API key via the `LMB_API_KEY` environment variable to keep it out of shell history.
+- Run the downloaded script with `sh llm-bench.sh` (not `curl … | sh`), so the interactive prompts can read your terminal.
 
 ## Usage
 
