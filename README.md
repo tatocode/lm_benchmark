@@ -121,9 +121,7 @@ uv run llm-benchmark   # serves both the UI and the API on port 8000
 For headless servers or plain terminals, a one-line launcher starts an interactive wizard — no web UI required. It reuses the same measurement engine (TTFT, throughput, TPOT, ITL, error rate) and the step-sweep analysis.
 
 ```bash
-# Interactive wizard: prompts for endpoint and workload, then runs
-curl -fsSL -o llm-bench.sh https://raw.githubusercontent.com/tatocode/lm_benchmark/main/llm-bench.sh
-sh llm-bench.sh
+curl -fsSL -o llm-bench.sh https://raw.githubusercontent.com/tatocode/lm_benchmark/main/llm-bench.sh && sh llm-bench.sh
 ```
 
 Or pass flags directly for a scriptable, non-interactive run:

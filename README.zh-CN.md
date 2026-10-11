@@ -125,9 +125,7 @@ uv run llm-benchmark   # 只需 8000 一个端口同时提供页面与 API
 （TTFT、吞吐、TPOT、ITL、错误率）与阶梯分析。
 
 ```bash
-# 交互式向导：逐步询问端点与压测配置后执行
-curl -fsSL -o llm-bench.sh https://raw.githubusercontent.com/tatocode/lm_benchmark/main/llm-bench.sh
-sh llm-bench.sh
+curl -fsSL -o llm-bench.sh https://raw.githubusercontent.com/tatocode/lm_benchmark/main/llm-bench.sh && sh llm-bench.sh
 ```
 
 也可以直接传参做非交互式、可脚本化的压测：
